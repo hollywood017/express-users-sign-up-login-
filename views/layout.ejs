@@ -12,6 +12,8 @@
         <a href="/">Home</a>
         <% if (typeof currentUser === "object") { %>
           <!-- If we got the logged in user variable -->
+          <a href="/rooms/new">Add a Room</a>
+          <a href="/my-rooms">Your Rooms</a>
           <a href="/special">Secret</a>
           <a href="/logout">Log Out</a>
       <%} else {%>

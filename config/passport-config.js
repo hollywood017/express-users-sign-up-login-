@@ -77,3 +77,118 @@ passport.use(new LocalStrategy(
     );
   }
 ));
+
+
+//passport -facebook (log in with your facebook account)
+const FbStrategy = require('passport-facebook').Strategy;
+
+passport.use(new FbStrategy(
+  {    //1st argument -> settings object
+    clientID: '411662565900672',
+    clientSecret: 'bff857cbd2f90e6da5696b1c0a3a348a',
+    callbackURL: '/auth/facebook/callback'
+  },            // out route (name this whatever you want)
+  (accessToken, refreshToken, profile, next) => {  //2nd argument -> callback
+           //(will be called when a user allows us to log them in with FACEBOOK)
+      console.log('');
+      console.log('---------FACEBOOK PROFILE INFO-----------');
+      console.log(profile);
+      console.log('');
+
+      UserModel.findOne(
+        {facebookId: profile.id},
+        (err, userFromDb) => {
+          //"userFromDb" will be empty if this is first time the user logs in with FACEBOOK
+          if(err) {
+            next(err);
+            return;
+          }
+          //Check if they have logged in before
+          if(userFromDb) {
+            //just log them in
+            next(null, userFromDb);
+            return;
+          }
+
+          //If it's the first time they log in, SAVE THEM IN THE DB!
+          const theUser = new UserModel({
+            fullName: profile.displayName,
+            facebookId: profile.id
+          });
+          theUser.save((err) => {
+            if(err) {
+              next(err);
+              return;
+            }
+            //Now that they are saved, Log them in.
+            next(null, theUser);
+          });
+        }
+      );
+
+
+      //Receiving the Faceook user info and SAVING IT!
+
+      //UNLESS we have already saved their info, in which case we log them in.
+  }
+));
+
+//passport-google-oauth (log in with Google account)
+const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+
+passport.use(new GoogleStrategy(
+  {    //1st argument -> settings object
+    clientID: '525959150202-3uh3n6b4leddodll9cdg3uv9grtac02d.apps.googleusercontent.com',
+    clientSecret: 'orKgLFsck--YHgfG9eKyteML',
+    callbackURL: '/auth/google/callback'
+  },            // out route (name this whatever you want)
+  (accessToken, refreshToken, profile, next) => {  //2nd argument -> callback
+           //(will be called when a user allows us to log them in with FACEBOOK)
+      console.log('');
+      console.log('---------GOOGLE PROFILE INFO-----------');
+      console.log(profile);
+      console.log('');
+
+      UserModel.findOne(
+        {googleId: profile.id},
+        (err, userFromDb) => {
+          //"userFromDb" will be empty if this is first time the user logs in with FACEBOOK
+          if(err) {
+            next(err);
+            return;
+          }
+          //Check if they have logged in before
+          if(userFromDb) {
+            //just log them in
+            next(null, userFromDb);
+            return;
+          }
+
+          //If it's the first time they log in, SAVE THEM IN THE DB!
+          const theUser = new UserModel({
+            fullName: profile.displayName,
+            googleId: profile.id
+          });
+
+          //if displayName is empty, use email instead.
+          if (theUser.fullName === undefined){
+            theUser.fullName = profile.emails[0].value;
+          }
+
+          theUser.save((err) => {
+            if(err) {
+              next(err);
+              return;
+            }
+            //Now that they are saved, Log them in.
+            next(null, theUser);
+          });
+        }
+      );
+
+
+      //Receiving the Faceook user info and SAVING IT!
+
+      //UNLESS we have already saved their info, in which case we log them in.
+  }
+));
