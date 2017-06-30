@@ -10,7 +10,14 @@
       <h1>Express Users</h1>
       <nav>
         <a href="/">Home</a>
-        <a href="/signup">Sign Up</a>
+        <% if (typeof currentUser === "object") { %>
+          <!-- If we got the logged in user variable -->
+          <a href="/special">Secret</a>
+          <a href="/logout">Log Out</a>
+      <%} else {%>
+          <a href="/signup">Sign Up</a>
+          <a href="/login">Log In</a>
+        <%}%>
       </nav>
     </header>
     <%- body %>

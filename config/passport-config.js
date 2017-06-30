@@ -6,15 +6,39 @@ const bcrypt = require('bcrypt');
 
 const UserModel = require('../models/user-model.js');
 //serializeUser (controls what goes into the bowel)
+// - save only the user's datatbase ID in the bowel
+// - happens ONLY when you login
+passport.serializeUser((userFromDb, next) => {
+  next(null, userFromDb._id);
+  //    |
+  // null in 1st argument means NO ERROR
+});
 
 //deserializeUser (controls what you check when you get the bowel)
+// - use the ID in the bowel to retrieve the user's information
+// - happens everytime you visit the site after logging in
+passport.deserializeUser((idFromBowl, next) => {
+  UserModel.findById(
+    idFromBowl,
+    (err, userFromDb) => {
+      if(err){
+        next(err);
+        return;
+      }
+      // Tell passport that we got the user's info from the DB
+      next(null, userFromDb);
+      //    |
+      // null in 1st argument means NO ERROR
+    }
+  );
+});
 
 //STRATEGIESꜜꜜꜜꜜꜜꜜꜜꜜꜜ--------------------------------------------
 //  the different ways we can log into our app
 //SETUP passport-local
 const LocalStrategy = require('passport-local').Strategy;
 
-passort.use(new LocalStrategy(
+passport.use(new LocalStrategy(
   {             //1st argument -> settings object
       usernameField: 'loginUsername',
       passwordField: 'loginPassword'
@@ -49,10 +73,7 @@ passort.use(new LocalStrategy(
         //If we pass those if statements, LOGIN SUCCESSFUL!!!
         next(null, userFromDb);
         //In PASSPORT, if you call next() with a user in 2nd position, that means LOGIN SUCCESS
-    }
-  );
-
-
-
+      }
+    );
   }
 ));

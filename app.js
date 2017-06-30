@@ -40,10 +40,29 @@ app.use(session({
 
 
 //PASSPORT middlewares---------------------------------
+//has to come before ROUTES
 //🚨🚨🚨 these need to come after "app.use(session(...));"🚨🚨🚨
 app.use(passport.initialize());
 app.use(passport.session());
 //PASSPORT middleswares go ABOVE---------------------------------
+
+
+
+// THIS MIDDLEWARE CREATES the "currentUser" for ALL VIEWS
+//(if the user is logged in)
+//(this needs to be below passprt and before your routes)
+app.use((req, res, next) => {
+  //"req.user" is defined by the passport middleware
+  //If the user is NOT logged in, "req.user" will be empty
+
+  //Check if the user IS logged in
+  if (req.user){
+    //Create the "currentUser" local variable for all views
+    res.locals.currentUser = req.user;
+  }
+  //🚨🚨🚨 if you don't do "next()" you pages will load forvever 🚨🚨🚨
+  next();
+});
 
 
 
